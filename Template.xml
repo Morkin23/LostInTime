@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.0">
+    <TriggerPackage/>
+    <TimerPackage/>
+    <AliasPackage/>
+    <ActionPackage/>
+    <ScriptPackage>
+        <ScriptGroup isActive="yes" isFolder="yes">
+            <name>CSSman</name>
+            <packageName>CSSman</packageName>
+            <script></script>
+            <eventHandlerList/>
+            <Script isActive="yes" isFolder="no">
+                <name>CSSMan</name>
+                <packageName></packageName>
+                <script>-- CSSMan by Vadi. Public domain.
+
+CSSMan = {}
+CSSMan.__index = CSSMan
+
+function CSSMan.new(stylesheet)
+  local obj  = { stylesheet = {} }
+  setmetatable(obj,CSSMan)
+  local trim = string.trim
+
+  assert(type(stylesheet) == &quot;string&quot;, &quot;CSSMan.new: no stylesheet provided. A possible error is that you might have used CSSMan.new, not CSSMan:new&quot;)
+
+  for line in stylesheet:gmatch(&quot;[^\r\n]+&quot;) do
+    local attribute, value = line:match(&quot;^(.-):(.-);$&quot;)
+    if attribute and value then
+      attribute, value = trim(attribute), trim(value)
+      obj.stylesheet[attribute] = value
+    end
+  end
+
+  return obj
+end
+
+function CSSMan:set(key, value)
+  self.stylesheet[key] = value
+end
+
+function CSSMan:get(key)
+  return self.stylesheet[key]
+end
+
+function CSSMan:getCSS(key)
+  local lines, concat = {}, table.concat
+  for k,v in pairs(self.stylesheet) do lines[#lines+1] = concat({k,&quot;: &quot;, v, &quot;;&quot;}) end
+  return concat(lines, &quot;\n&quot;)
+end
+
+function CSSMan:gettable()
+  return self.stylesheet
+end
+
+function CSSMan:settable(tbl)
+  assert(type(tbl) == &quot;table&quot;, &quot;CSSMan:settable: table expected, got &quot;..type(tbl))
+
+  self.stylesheet = tbl
+end</script>
+                <eventHandlerList/>
+            </Script>
+        </ScriptGroup>
+        <ScriptGroup isActive="yes" isFolder="yes">
+            <name>GUI</name>
+            <packageName></packageName>
+            <script>GUI = GUI or {}
+</script>
+            <eventHandlerList/>
+            <Script isActive="yes" isFolder="no">
+                <name>Set Borders</name>
+                <packageName></packageName>
+                <script>local w,h = getMainWindowSize()
+setBorderLeft(w/4)
+setBorderTop(h/10)
+setBorderBottom(h/10)
+setBorderRight(w/4)</script>
+                <eventHandlerList/>
+            </Script>
+            <Script isActive="yes" isFolder="no">
+                <name>Create Background</name>
+                <packageName></packageName>
+                <script>GUI.BackgroundCSS = CSSMan.new([[
+  background-color: rgb(20,0,20);
+]])
+
+GUI.Left = Geyser.Label:new({
+  name = &quot;GUI.Left&quot;,
+  x = 0, y = 0,
+  width = &quot;25%&quot;,
+  height = &quot;100%&quot;,
+})
+GUI.Left:setStyleSheet(GUI.BackgroundCSS:getCSS())
+
+GUI.Right = Geyser.Label:new({
+  name = &quot;GUI.Right&quot;,
+  x = &quot;-25%&quot;, y = 0,
+  width = &quot;25%&quot;,
+  height = &quot;100%&quot;,
+})
+GUI.Right:setStyleSheet(GUI.BackgroundCSS:getCSS())
+
+GUI.Top = Geyser.Label:new({
+  name = &quot;GUI.Top&quot;,
+  x = &quot;25%&quot;, y = 0,
+  width = &quot;50%&quot;,
+  height = &quot;10%&quot;,
+})
+GUI.Top:setStyleSheet(GUI.BackgroundCSS:getCSS())
+
+GUI.Bottom = Geyser.Label:new({
+  name = &quot;GUI.Bottom&quot;,
+  x = &quot;25%&quot;, y = &quot;90%&quot;,
+  width = &quot;50%&quot;,
+  height = &quot;10%&quot;,
+})
+GUI.Bottom:setStyleSheet(GUI.BackgroundCSS:getCSS())</script>
+                <eventHandlerList/>
+            </Script>
+            <Script isActive="yes" isFolder="no">
+                <name>Header Icons</name>
+                <packageName></packageName>
+                <script>GUI.Header = Geyser.HBox:new({
+  name = &quot;GUI.Header&quot;,
+  x = 0, y = 0,
+  width = &quot;100%&quot;,
+  height = &quot;100%&quot;,
+},GUI.Top)
+
+GUI.IconCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,100);
+  border-style: solid;
+  border-width: 1px;
+  border-color: white;
+  border-radius: 5px;
+  margin: 5px;
+  qproperty-wordWrap: true;
+]])
+
+for i=1,12 do
+  GUI[&quot;Icon&quot;..i] = Geyser.Label:new({
+    name = &quot;GUI.Icon&quot;..i,
+  },GUI.Header)
+  GUI[&quot;Icon&quot;..i]:setStyleSheet(GUI.IconCSS:getCSS())
+  GUI[&quot;Icon&quot;..i]:echo(&quot;&lt;center&gt;GUI. Icon&quot;..i)
+end</script>
+                <eventHandlerList/>
+            </Script>
+            <Script isActive="yes" isFolder="no">
+                <name>Gauges</name>
+                <packageName></packageName>
+                <script>GUI.Footer = Geyser.HBox:new({
+  name = &quot;GUI.Footer&quot;,
+  x = 0, y = 0,
+  width = &quot;100%&quot;,
+  height = &quot;100%&quot;,
+},GUI.Bottom)
+
+GUI.LeftColumn = Geyser.VBox:new({
+  name = &quot;GUI.LeftColumn&quot;,
+},GUI.Footer)
+
+GUI.RightColumn = Geyser.VBox:new({
+  name = &quot;GUI.RightColumn&quot;,
+},GUI.Footer)
+
+GUI.GaugeBackCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,0);
+  border-style: solid;
+  border-color: white;
+  border-width: 1px;
+  border-radius: 5px;
+  margin: 5px;
+]])
+
+GUI.GaugeFrontCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,0);
+  border-style: solid;
+  border-color: white;
+  border-width: 1px;
+  border-radius: 5px;
+  margin: 5px;
+]])
+
+GUI.Health = Geyser.Gauge:new({
+  name = &quot;GUI.Health&quot;,
+},GUI.LeftColumn)
+GUI.Health.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,&quot;red&quot;)
+GUI.Health.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+GUI.Health:setValue(math.random(100),100)
+GUI.Health.front:echo(&quot;GUI.Health&quot;)
+
+GUI.Mana = Geyser.Gauge:new({
+  name = &quot;GUI.Mana&quot;,
+},GUI.LeftColumn)
+GUI.Mana.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,&quot;blue&quot;)
+GUI.Mana.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+GUI.Mana:setValue(math.random(100),100)
+GUI.Mana.front:echo(&quot;GUI.Mana&quot;)
+
+GUI.Endurance = Geyser.Gauge:new({
+  name = &quot;GUI.Endurance&quot;,
+},GUI.RightColumn)
+GUI.Endurance.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,&quot;yellow&quot;)
+GUI.Endurance.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+GUI.Endurance:setValue(math.random(100),100)
+--GUI.Endurance.front:echo(&quot;GUI.Endurance&quot;)
+GUI.Endurance.front:echo([[&lt;span style = &quot;color: black&quot;&gt;GUI.Endurance&lt;/span&gt;]])
+
+GUI.Enemy = Geyser.Gauge:new({
+  name = &quot;GUI.Enemy&quot;,
+},GUI.RightColumn)
+GUI.Enemy.back:setStyleSheet(GUI.GaugeBackCSS:getCSS())
+GUI.GaugeFrontCSS:set(&quot;background-color&quot;,&quot;purple&quot;)
+GUI.Enemy.front:setStyleSheet(GUI.GaugeFrontCSS:getCSS())
+GUI.Enemy:setValue(math.random(100),100)
+GUI.Enemy.front:echo(&quot;GUI.Enemy&quot;)
+</script>
+                <eventHandlerList/>
+            </Script>
+            <Script isActive="yes" isFolder="no">
+                <name>Boxes</name>
+                <packageName></packageName>
+                <script>GUI.BoxCSS = CSSMan.new([[
+  background-color: rgba(0,0,0,100);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 10px;
+  border-color: white;
+  margin: 10px;
+]])
+
+GUI.Box1 = Geyser.Mapper:new({
+  name = &quot;GUI.Box1&quot;,
+  x = 0, y = 0,
+  width = &quot;100%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Right)
+
+
+GUI.Box2 = Geyser.Label:new({
+  name = &quot;GUI.Box2&quot;,
+  x = 0, y = &quot;50%&quot;,
+  width = &quot;50%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Right)
+GUI.Box2:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box2:echo(&quot;&lt;center&gt;GUI.Box2&quot;)
+
+GUI.Box3 = Geyser.Label:new({
+  name = &quot;GUI.Box3&quot;,
+  x = &quot;50%&quot;, y = &quot;50%&quot;,
+  width = &quot;50%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Right)
+GUI.Box3:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box3:echo(&quot;&lt;center&gt;GUI.Box3&quot;)
+
+GUI.Box4 = Geyser.Label:new({
+  name = &quot;GUI.Box4&quot;,
+  x = &quot;0%&quot;, y = &quot;0%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;25%&quot;,
+},GUI.Left)
+GUI.Box4:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box4:echo(&quot;&lt;center&gt;GUI.Box4&quot;)
+
+GUI.Box5 = Geyser.MiniConsole:new({
+  name = &quot;GUI.Box5&quot;,
+  x = &quot;0%&quot;, y = &quot;25%&quot;,
+  width = &quot;50%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Left)
+
+
+GUI.Box6 = Geyser.MiniConsole:new({
+  name = &quot;GUI.Box6&quot;,
+  x = &quot;50%&quot;, y = &quot;25%&quot;,
+  width = &quot;50%&quot;,
+  height = &quot;50%&quot;,
+},GUI.Left)
+
+
+GUI.Box7 = Geyser.Label:new({
+  name = &quot;GUI.Box7&quot;,
+  x = &quot;0%&quot;, y = &quot;75%&quot;,
+  width = &quot;100%&quot;,
+  height = &quot;25%&quot;,
+},GUI.Left)
+GUI.Box7:setStyleSheet(GUI.BoxCSS:getCSS())
+GUI.Box7:echo(&quot;&lt;center&gt;GUI.Box7&quot;)
+
+</script>
+                <eventHandlerList/>
+            </Script>
+        </ScriptGroup>
+    </ScriptPackage>
+    <KeyPackage/>
+</MudletPackage>
